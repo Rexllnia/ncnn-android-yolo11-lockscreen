@@ -1,0 +1,1 @@
+/usr/bin/cc -fPIC -shared -Wl,-soname,libapiServer.so -o libapiServer.so CMakeFiles/apiServer.dir/api_server.c.o CMakeFiles/apiServer.dir/usock.c.o 

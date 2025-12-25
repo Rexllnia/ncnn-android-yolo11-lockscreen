@@ -1,0 +1,3 @@
+/home/zhengyufan/ncnn-android-yolov8/ncnn-android-yolov8/app/src/main/jni/rest_api_server/CMakeFiles/apiServer.dir
+/home/zhengyufan/ncnn-android-yolov8/ncnn-android-yolov8/app/src/main/jni/rest_api_server/CMakeFiles/edit_cache.dir
+/home/zhengyufan/ncnn-android-yolov8/ncnn-android-yolov8/app/src/main/jni/rest_api_server/CMakeFiles/rebuild_cache.dir

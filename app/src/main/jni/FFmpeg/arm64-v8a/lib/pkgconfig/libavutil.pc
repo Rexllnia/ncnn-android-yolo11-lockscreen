@@ -1,0 +1,14 @@
+prefix=/home/zhengyufan/FFmpeg/android/arm64
+exec_prefix=${prefix}
+libdir=/home/zhengyufan/FFmpeg/android/arm64/lib
+includedir=/home/zhengyufan/FFmpeg/android/arm64/include
+
+Name: libavutil
+Description: FFmpeg utility library
+Version: 60.19.101
+Requires: 
+Requires.private: 
+Conflicts:
+Libs: -L${libdir}  -lavutil 
+Libs.private: -lm -latomic -landroid -pthread
+Cflags: -I${includedir}
