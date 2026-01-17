@@ -25,11 +25,11 @@ import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 
 class MainActivity : ComponentActivity() {
-    private val yolov8ncnn = Yolov8Ncnn()
-    private var current_model = 0
-    private var current_cpugpu = 1
-    private var cameraView: SurfaceView? = null
-    private val apiServer = ApiServer()
+//    private val yolov8ncnn = Yolov8Ncnn()
+//    private var current_model = 0
+//    private var current_cpugpu = 1
+//    private var cameraView: SurfaceView? = null
+//    private val apiServer = ApiServer()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,45 +53,45 @@ class MainActivity : ComponentActivity() {
 //        yolov8ncnn.openRTSP()
 //        apiServer.startServer()
     }
-    private fun yolo_module_test() {
-        setContentView(R.layout.main)
-
-        cameraView = findViewById<View>(R.id.cameraview) as SurfaceView
-        cameraView!!.holder.setFormat(PixelFormat.RGBA_8888);
-        cameraView!!.holder.addCallback(object : SurfaceHolder.Callback {
-            override fun surfaceCreated(holder: SurfaceHolder) {
-                initCamera(holder)
-            }
-            override fun surfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) {
-                yolov8ncnn.setOutputWindow(holder.surface)
-            }
-            override fun surfaceDestroyed(holder: SurfaceHolder) {
-                // TODO: closeCamera() if needed
-            }
-        })
-        requestCamera()
-    }
-    private fun requestCamera() {
-        if (ActivityCompat.checkSelfPermission(
-                this,
-                android.Manifest.permission.CAMERA
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.CAMERA), 100)
-        }
-    }
-    private fun reload() {
-        val ret_init: Boolean = yolov8ncnn.loadModel(assets,0, current_model, current_cpugpu)
-        if (!ret_init) {
-            Log.e("MainActivity", "yolov8ncnn loadModel failed")
-        }
-    }
-    private fun initCamera(holder: SurfaceHolder) {
-        yolov8ncnn.setOutputWindow(holder.surface)
-
-        val ret = yolov8ncnn.openCamera(1) // 1 后置摄像头
-        if (!ret) {
-            Log.e("MainActivity", "Camera open failed")
-        }
-    }
+//    private fun yolo_module_test() {
+//        setContentView(R.layout.main)
+//
+//        cameraView = findViewById<View>(R.id.cameraview) as SurfaceView
+//        cameraView!!.holder.setFormat(PixelFormat.RGBA_8888);
+//        cameraView!!.holder.addCallback(object : SurfaceHolder.Callback {
+//            override fun surfaceCreated(holder: SurfaceHolder) {
+//                initCamera(holder)
+//            }
+//            override fun surfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) {
+//                yolov8ncnn.setOutputWindow(holder.surface)
+//            }
+//            override fun surfaceDestroyed(holder: SurfaceHolder) {
+//                // TODO: closeCamera() if needed
+//            }
+//        })
+//        requestCamera()
+//    }
+//    private fun requestCamera() {
+//        if (ActivityCompat.checkSelfPermission(
+//                this,
+//                android.Manifest.permission.CAMERA
+//            ) != PackageManager.PERMISSION_GRANTED
+//        ) {
+//            ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.CAMERA), 100)
+//        }
+//    }
+//    private fun reload() {
+//        val ret_init: Boolean = yolov8ncnn.loadModel(assets,0, current_model, current_cpugpu)
+//        if (!ret_init) {
+//            Log.e("MainActivity", "yolov8ncnn loadModel failed")
+//        }
+//    }
+//    private fun initCamera(holder: SurfaceHolder) {
+//        yolov8ncnn.setOutputWindow(holder.surface)
+//
+//        val ret = yolov8ncnn.openCamera(1) // 1 后置摄像头
+//        if (!ret) {
+//            Log.e("MainActivity", "Camera open failed")
+//        }
+//    }
 }

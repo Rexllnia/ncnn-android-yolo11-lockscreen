@@ -32,10 +32,20 @@
 
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
-
+//#include "./RtspServer/src/xop/RtspServer.h"
+//#include "./RtspServer/src/net/Timer.h"
+//#include "H264RingBuffer.h"
+#include <thread>
+#include <memory>
+#include <iostream>
+#include <string>
+#include "watchdog.h"
 #if __ARM_NEON
 #include <arm_neon.h>
 #endif // __ARM_NEON
+
+//extern H264RingBuffer* g_ring;
+
 
 static int draw_unsupported(cv::Mat& rgb)
 {
@@ -267,7 +277,12 @@ JNIEXPORT jboolean JNICALL Java_com_example_ncnn_1android_1yolov8_1new_Yolov8Ncn
 
     return JNI_TRUE;
 }
-
+void camera_restart_cb(void* user) {
+    __android_log_print(ANDROID_LOG_ERROR, "Watchdog", "Camera timeout! Restarting...");
+    // user 可以是你的 camera 对象
+    g_camera->close();
+    g_camera->open((int)1);
+}
 // public native boolean openCamera(int facing);
 JNIEXPORT jboolean JNICALL Java_com_example_ncnn_1android_1yolov8_1new_Yolov8Ncnn_openCamera(JNIEnv* env, jobject thiz, jint facing)
 {
@@ -277,7 +292,7 @@ JNIEXPORT jboolean JNICALL Java_com_example_ncnn_1android_1yolov8_1new_Yolov8Ncn
     __android_log_print(ANDROID_LOG_DEBUG, "ncnn", "openCamera %d", facing);
 
     g_camera->open((int)facing);
-
+    watchdog_get_instance(10000, camera_restart_cb, NULL); // 10秒超时
     return JNI_TRUE;
 }
 
@@ -291,36 +306,106 @@ JNIEXPORT jboolean JNICALL Java_com_example_ncnn_1android_1yolov8_1new_Yolov8Ncn
     return JNI_TRUE;
 }
 
+
+
+
+class H264File
+{
+public:
+    H264File(int buf_size=500000);
+    ~H264File();
+
+    bool Open(const char *path);
+    void Close();
+
+    bool IsOpened() const
+    { return (m_file != NULL); }
+
+    int ReadFrame(char* in_buf, int in_buf_size, bool* end);
+
+private:
+    FILE *m_file = NULL;
+    char *m_buf = NULL;
+    int  m_buf_size = 0;
+    int  m_bytes_used = 0;
+    int  m_count = 0;
+};
+
+//void SendFrameThread(xop::RtspServer* rtsp_server, xop::MediaSessionId session_id);
+
 // public native boolean setOutputWindow(Surface surface);
+
 JNIEXPORT jboolean JNICALL Java_com_example_ncnn_1android_1yolov8_1new_Yolov8Ncnn_setOutputWindow(JNIEnv* env, jobject thiz, jobject surface)
 {
-//    ANativeWindow* win = ANativeWindow_fromSurface(env, surface);
 
-//    __android_log_print(ANDROID_LOG_DEBUG, "ncnn", "setOutputWindow %p", win);
+//    g_ring = new H264RingBuffer(60); // 2 秒缓冲
+//
+//    std::string suffix = "live";
+//    std::string ip = "127.0.0.1";
+//    std::string port = "554";
+//    std::string rtsp_url = "rtsp://" + ip + ":" + port + "/" + suffix;
 
-// 创建最简单的虚拟窗口
-    static int fake_buffer[1];  // 最小的缓冲区
+//    std::shared_ptr<xop::EventLoop> event_loop(new xop::EventLoop());
+//    std::shared_ptr<xop::RtspServer> server = xop::RtspServer::Create(event_loop.get());
 
-    // 创建一个假的ANativeWindow结构体
-    // 注意：这是hack方法，不保证所有摄像头库都兼容
-    struct DummyWindow {
-        int32_t width = 640;
-        int32_t height = 480;
-        int32_t stride = 640;
-        int32_t format = 0x11;  // WINDOW_FORMAT_RGBX_8888
-        void* bits = fake_buffer;
-    };
-
-    static DummyWindow dummy_window;
-
-    // 将dummy_window强制转换为ANativeWindow*
-    ANativeWindow* fake_win = reinterpret_cast<ANativeWindow*>(&dummy_window);
-
-    g_camera->set_window(fake_win);
+//    if (!server->Start("0.0.0.0", atoi(port.c_str()))) {
+//        printf("RTSP Server listen on %s failed.\n", port.c_str());
+//        return 0;
+//    }
+//
+//#ifdef AUTH_CONFIG
+//    server->SetAuthConfig("-_-", "admin", "12345");
+//#endif
+//
+//    xop::MediaSession *session = xop::MediaSession::CreateNew("live");
+//    session->AddSource(xop::channel_0, xop::H264Source::CreateNew());
+//    //session->StartMulticast();
+//    session->AddNotifyConnectedCallback([] (xop::MediaSessionId sessionId, std::string peer_ip, uint16_t peer_port){
+//        printf("RTSP client connect, ip=%s, port=%hu \n", peer_ip.c_str(), peer_port);
+//    });
+//
+//    session->AddNotifyDisconnectedCallback([](xop::MediaSessionId sessionId, std::string peer_ip, uint16_t peer_port) {
+//        printf("RTSP client disconnect, ip=%s, port=%hu \n", peer_ip.c_str(), peer_port);
+//    });
+//
+//    xop::MediaSessionId session_id = server->AddSession(session);
+//
+//    std::thread t1(SendFrameThread, server.get(), session_id);
+//    t1.detach();
+//
+//    std::cout << "Play URL: " << rtsp_url << std::endl;
 
     return JNI_TRUE;
 }
 
 }
-
+//
+//void SendFrameThread(xop::RtspServer* rtsp_server, xop::MediaSessionId session_id)
+//{
+//    int buf_size = 2000000;
+//    std::unique_ptr<uint8_t> frame_buf(new uint8_t[buf_size]);
+//
+//    while(1) {
+//        H264Frame frame;
+//        if (!g_ring->Pop(frame)) {
+//            continue;
+//        }
+//
+//        xop::AVFrame videoFrame = {0};
+//        videoFrame.type = 0;
+//        videoFrame.size = frame.data.size();
+//        videoFrame.timestamp = xop::H264Source::GetTimestamp();
+//
+//        videoFrame.buffer.reset(new uint8_t[videoFrame.size]);
+//        memcpy(videoFrame.buffer.get(),
+//               frame.data.data(),
+//               videoFrame.size);
+//
+//        rtsp_server->PushFrame(session_id,
+//                               xop::channel_0,
+//                               videoFrame);
+//    };
+//}
 #include "./yolov8_light_on_off/yolov8ncnn_extend.cpp"
+
+

@@ -62,14 +62,12 @@
 
 using json = nlohmann::json;
 extern "C" {
-#include <usock.h>
-#include <sys/socket.h>
+#include "tcp_client.h"
 void api_server_set_content(const char* content);
 }
-static int client_fd;
-YOLOv8_det::YOLOv8_det() {
 
-    client_fd = usock(USOCK_TCP | USOCK_IPV4ONLY | USOCK_NUMERIC, "192.168.1.70", "9000");
+YOLOv8_det::YOLOv8_det() {
+    tcp_client_init ();
 }
 static inline float intersection_area(const Object& a, const Object& b)
 {
@@ -474,11 +472,7 @@ int YOLOv8_det_coco::draw(cv::Mat& rgb, const std::vector<Object>& objects)
     std::string s = jroot.dump();
     api_server_set_content(s.c_str());
     if (last_status != status) {
-        if (send(client_fd, s.c_str(), s.length(), 0) < 0) {
-            client_fd = usock(USOCK_TCP | USOCK_IPV4ONLY | USOCK_NUMERIC, "192.168.1.70", "9000");
-            send(client_fd, s.c_str(), s.length(), 0);
-        }
-
+        tcp_client_add_element(s.c_str());
         last_status = status;
     }
 

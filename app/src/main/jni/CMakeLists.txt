@@ -12,6 +12,8 @@ find_package(ncnn REQUIRED)
 # FFmpeg 路径
 set(FFMPEG_DIR ${CMAKE_SOURCE_DIR}/FFmpeg)
 
+
+
 # 引入 FFmpeg
 add_library(avcodec SHARED IMPORTED)
 set_target_properties(avcodec PROPERTIES IMPORTED_LOCATION
@@ -43,9 +45,10 @@ include_directories(${LIBUBOX_DIR})
 
 add_subdirectory(rest_api_server)
 add_subdirectory(libubox-2015-11-08)
-
+#add_subdirectory(RtspServer)
 add_subdirectory(mosquitto)
 include_directories(mosquitto/include)
+#add_subdirectory(RtspServer)
 #set(MQTT_DIR ${CMAKE_SOURCE_DIR}/mosquitto)
 #add_library(mosquitto STATIC IMPORTED)
 #set_target_properties(mosquitto PROPERTIES
@@ -53,9 +56,6 @@ include_directories(mosquitto/include)
 #        ${MQTT_DIR}/android_out/${ANDROID_ABI}/libmosquitto.so
 #)
 #include_directories(${MQTT_DIR}/include)
-
-
-
 add_library(yolov8ncnn SHARED yolov8ncnn.cpp  yolov8.cpp
         yolov8_cls.cpp
         yolov8_det.cpp
@@ -67,6 +67,9 @@ add_library(yolov8ncnn SHARED yolov8ncnn.cpp  yolov8.cpp
         kalman.c
         ffmpeg_rtsp_client/ffmpeg_rtsp_client.cpp
         ndkcamera.cpp
+        tcp_client.c
+        spsc.c
+        watchdog.c
 )
 
 target_link_libraries(yolov8ncnn ncnn ${OpenCV_LIBS} camera2ndk mediandk apiServer avcodec
@@ -76,4 +79,5 @@ target_link_libraries(yolov8ncnn ncnn ${OpenCV_LIBS} camera2ndk mediandk apiServ
         swscale
         ubox
         libmosquitto
- )
+#        rtsp
+)

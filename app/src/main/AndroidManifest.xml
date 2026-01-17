@@ -21,6 +21,7 @@
             android:enabled="true"
             android:exported="true"
             android:foregroundServiceType="camera"
+            android:persistent="true"
             tools:ignore="ForegroundServicePermission" />
 
         <activity
